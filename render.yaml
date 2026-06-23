@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: dhanush-stats-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn stats_api:app
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false   # You set this manually in Render dashboard
