@@ -7,3 +7,7 @@ services:
     envVars:
       - key: GITHUB_TOKEN
         sync: false   # You set this manually in Render dashboard
+      - key: WEB3FORMS_ACCESS_KEY
+        sync: false   # From https://web3forms.com — delivers form mail to your inbox
+      - key: CONTACT_EMAIL
+        value: dhanushin2k23@gmail.com

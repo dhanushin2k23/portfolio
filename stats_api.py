@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-import requests, os, json
+import requests, os, json, re
 from datetime import datetime, timezone
 
 app = Flask(__name__)
@@ -9,6 +9,10 @@ CORS(app)  # Allow portfolio frontend to call this
 GITHUB_TOKEN    = os.environ.get("GITHUB_TOKEN")
 GITHUB_USERNAME = "dhanushin2k23"
 LEETCODE_USERNAME = "dhanushin2k23"
+CONTACT_EMAIL   = os.environ.get("CONTACT_EMAIL", "dhanushin2k23@gmail.com")
+WEB3FORMS_KEY   = os.environ.get("WEB3FORMS_ACCESS_KEY")
+
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 # ── GitHub ──────────────────────────────────────────────
 @app.route("/api/github")
@@ -123,6 +127,47 @@ def leetcode():
         "ranking": user["profile"]["ranking"],
         "days":   calendar  # [{date, count}, ...]
     })
+
+
+# ── Contact form ────────────────────────────────────────
+@app.route("/api/contact", methods=["POST"])
+def contact():
+    if not WEB3FORMS_KEY:
+        return jsonify({"error": "Contact form is not configured on the server"}), 503
+
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()[:200]
+    email = (data.get("email") or "").strip()[:254]
+    message = (data.get("message") or "").strip()[:5000]
+
+    if not name or not email or not message:
+        return jsonify({"error": "All fields are required"}), 400
+
+    if not EMAIL_RE.match(email):
+        return jsonify({"error": "Invalid email address"}), 400
+
+    try:
+        resp = requests.post(
+            "https://api.web3forms.com/submit",
+            json={
+                "access_key": WEB3FORMS_KEY,
+                "name": name,
+                "email": email,
+                "message": message,
+                "subject": f"Portfolio contact from {name}",
+                "replyto": email,
+                "from_name": "DHANUSH Portfolio",
+            },
+            timeout=15,
+        )
+        result = resp.json()
+    except (requests.RequestException, ValueError):
+        return jsonify({"error": "Failed to send message"}), 502
+
+    if result.get("success"):
+        return jsonify({"ok": True})
+
+    return jsonify({"error": result.get("message", "Failed to send message")}), 502
 
 
 if __name__ == "__main__":

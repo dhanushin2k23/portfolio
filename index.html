@@ -1204,8 +1204,7 @@
           </div>
         </div>
 
-        <form id="contact-form" class="space-y-6 bg-gray-50 p-6 border-2 border-black"
-          onsubmit="event.preventDefault(); this.innerHTML='<div class=\'py-20 text-center\'><i class=\'ri-checkbox-circle-fill text-6xl text-neo-green mb-4 block\'></i><h3 class=\'text-2xl font-black uppercase\'>Transmission Received</h3><p class=\'font-mono text-sm mt-2\'>Will respond. No cap.</p></div>'">
+        <form id="contact-form" class="space-y-6 bg-gray-50 p-6 border-2 border-black">
           <div class="flex flex-col">
             <label class="font-mono font-bold mb-1 uppercase text-xs">Identity</label>
             <input type="text" placeholder="NAME / COMPANY" required
@@ -1346,6 +1345,38 @@
       };
       img.onerror = () => { img.classList.add('hidden'); };
     }
+
+    // ── Contact form (sends to inbox via portfolio API) ──
+    const PORTFOLIO_API = "https://portfolio-z874.onrender.com";
+    const CONTACT_SUCCESS_HTML =
+      '<div class=\'py-20 text-center\'><i class=\'ri-checkbox-circle-fill text-6xl text-neo-green mb-4 block\'></i>' +
+      '<h3 class=\'text-2xl font-black uppercase\'>Transmission Received</h3>' +
+      '<p class=\'font-mono text-sm mt-2\'>Will respond. No cap.</p></div>';
+
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const fields = form.querySelectorAll('input, textarea');
+      const name = fields[0].value.trim();
+      const email = fields[1].value.trim();
+      const message = fields[2].value.trim();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${PORTFOLIO_API}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Send failed');
+        form.innerHTML = CONTACT_SUCCESS_HTML;
+      } catch (err) {
+        btn.disabled = false;
+        alert('Could not send right now. Email dhanushin2k23@gmail.com directly.');
+      }
+    });
   </script>
 
 </body>
