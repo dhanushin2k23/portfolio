@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import requests, os
+import requests, os, json
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 CORS(app)  # Allow portfolio frontend to call this
@@ -90,22 +91,27 @@ def leetcode():
         json={"query": query, "variables": {"username": LEETCODE_USERNAME}},
         headers={
             "Content-Type": "application/json",
-            "Referer": "https://leetcode.com"
+            "Referer": "https://leetcode.com",
+            "Origin": "https://leetcode.com",
         },
-        timeout=10
+        timeout=15
     ).json()
+
+    if resp.get("errors") or not resp.get("data", {}).get("matchedUser"):
+        return jsonify({"error": "LeetCode user not found"}), 404
 
     user = resp["data"]["matchedUser"]
     stats = {s["difficulty"]: s["count"] for s in user["submitStats"]["acSubmissionNum"]}
 
-    import json
-    # submissionCalendar: {"timestamp": count, ...}
-    raw_cal = json.loads(user["userCalendar"]["submissionCalendar"])
-    # Convert unix timestamps to date strings
-    from datetime import datetime, timezone
+    raw_cal = user["userCalendar"]["submissionCalendar"] or "{}"
+    if isinstance(raw_cal, str):
+        raw_cal = json.loads(raw_cal)
+
     calendar = [
-        {"date": datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%d"),
-         "count": cnt}
+        {
+            "date": datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%d"),
+            "count": int(cnt),
+        }
         for ts, cnt in raw_cal.items()
     ]
 

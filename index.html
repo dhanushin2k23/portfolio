@@ -637,17 +637,14 @@
           <div class="flex items-center gap-6 px-5 py-4" style="border-bottom:1px solid rgba(51,255,87,0.15);">
             <!-- Donut SVG -->
             <div class="relative flex-shrink-0" style="width:72px;height:72px;">
-              <svg viewBox="0 0 72 72" width="72" height="72">
+              <svg id="lc-donut" viewBox="0 0 72 72" width="72" height="72">
                 <circle cx="36" cy="36" r="28" fill="none" stroke="#1a1a1a" stroke-width="8"/>
-                <!-- Easy: 54/127 = 42% -->
-                <circle cx="36" cy="36" r="28" fill="none" stroke="#33FF57" stroke-width="8"
-                  stroke-dasharray="74 176" stroke-dashoffset="44" stroke-linecap="butt"/>
-                <!-- Medium: 71/127 = 56% -->
-                <circle cx="36" cy="36" r="28" fill="none" stroke="#FBFF48" stroke-width="8"
-                  stroke-dasharray="98 176" stroke-dashoffset="-30" stroke-linecap="butt"/>
-                <!-- Hard: 2/127 = 1.5% -->
-                <circle cx="36" cy="36" r="28" fill="none" stroke="#FF2A2A" stroke-width="8"
-                  stroke-dasharray="3 176" stroke-dashoffset="-128" stroke-linecap="butt"/>
+                <circle id="lc-donut-easy" cx="36" cy="36" r="28" fill="none" stroke="#33FF57" stroke-width="8"
+                  stroke-dasharray="0 176" stroke-dashoffset="44" stroke-linecap="butt"/>
+                <circle id="lc-donut-medium" cx="36" cy="36" r="28" fill="none" stroke="#FBFF48" stroke-width="8"
+                  stroke-dasharray="0 176" stroke-dashoffset="44" stroke-linecap="butt"/>
+                <circle id="lc-donut-hard" cx="36" cy="36" r="28" fill="none" stroke="#FF2A2A" stroke-width="8"
+                  stroke-dasharray="0 176" stroke-dashoffset="44" stroke-linecap="butt"/>
               </svg>
               <div class="absolute inset-0 flex flex-col items-center justify-center">
                 <span id="lc-total" class="font-mono font-black text-white" style="font-size:18px;line-height:1;">...</span>
@@ -662,7 +659,7 @@
                   <span id="lc-easy" style="color:#555;">...</span>
                 </div>
                 <div class="w-full rounded-none" style="height:4px;background:rgba(255,255,255,0.07);">
-                  <div style="height:4px;width:5.7%;background:#33FF57;"></div>
+                  <div id="lc-easy-bar" style="height:4px;width:0%;background:#33FF57;transition:width .4s ease;"></div>
                 </div>
               </div>
               <div>
@@ -671,7 +668,7 @@
                   <span id="lc-medium" style="color:#555;">...</span>
                 </div>
                 <div class="w-full" style="height:4px;background:rgba(255,255,255,0.07);">
-                  <div style="height:4px;width:3.4%;background:#FBFF48;"></div>
+                  <div id="lc-medium-bar" style="height:4px;width:0%;background:#FBFF48;transition:width .4s ease;"></div>
                 </div>
               </div>
               <div>
@@ -680,17 +677,29 @@
                   <span id="lc-hard" style="color:#555;">...</span>
                 </div>
                 <div class="w-full" style="height:4px;background:rgba(255,255,255,0.07);">
-                  <div style="height:4px;width:0.3%;background:#FF2A2A;"></div>
+                  <div id="lc-hard-bar" style="height:4px;width:0%;background:#FF2A2A;transition:width .4s ease;"></div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Contribution heatmap — pure CSS grid -->
+          <!-- Contribution heatmap — 7 rows × 53 week columns (matches LeetCode/GitHub layout) -->
           <div class="px-4 py-3" style="border-bottom:1px solid rgba(51,255,87,0.15);">
-            <div class="font-mono mb-2" style="font-size:9px;color:#444;letter-spacing:.1em;">ACTIVITY — LAST 52 WEEKS</div>
-            <div id="lc-heatmap" style="display:grid;grid-template-columns:repeat(53,1fr);gap:2px;"></div>
-            <div class="flex justify-between font-mono mt-1.5" style="font-size:8px;color:#333;">
-              <span>JUL</span><span>SEP</span><span>NOV</span><span>JAN</span><span>MAR</span><span>MAY</span><span>JUN</span>
+            <div class="font-mono mb-2" style="font-size:9px;color:#444;letter-spacing:.1em;">SUBMISSION ACTIVITY — LAST 52 WEEKS</div>
+            <div id="lc-month-labels" class="flex justify-between font-mono mb-1" style="font-size:8px;color:#333;padding-left:14px;"></div>
+            <div class="flex gap-1">
+              <div class="flex flex-col justify-between font-mono flex-shrink-0" style="font-size:7px;color:#333;padding-top:1px;padding-bottom:1px;width:10px;">
+                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+              </div>
+              <div id="lc-heatmap" style="display:grid;grid-template-columns:repeat(53,1fr);grid-template-rows:repeat(7,1fr);gap:2px;flex:1;min-width:0;"></div>
+            </div>
+            <div class="flex items-center gap-2 mt-2 justify-end">
+              <span class="font-mono" style="font-size:8px;color:#444;">LESS</span>
+              <div style="width:8px;height:8px;background:#1a1a1a;border:1px solid #333;"></div>
+              <div style="width:8px;height:8px;background:#0a3320;"></div>
+              <div style="width:8px;height:8px;background:#145c36;"></div>
+              <div style="width:8px;height:8px;background:#1e8c50;"></div>
+              <div style="width:8px;height:8px;background:#33FF57;"></div>
+              <span class="font-mono" style="font-size:8px;color:#444;">MORE</span>
             </div>
           </div>
           <!-- Rank -->
@@ -774,6 +783,9 @@
         // Local test: const STATS_API = "http://localhost:5001";
 
         // ── Helpers ──────────────────────────────────
+        const HEATMAP_WEEKS = 53;
+        const DONUT_CIRC = 2 * Math.PI * 28;
+
         function intensityColor(count, colors) {
           if (count === 0) return colors[0];
           if (count <= 2)  return colors[1];
@@ -782,13 +794,103 @@
           return colors[4];
         }
 
+        function formatDateUTC(date) {
+          return date.toISOString().slice(0, 10);
+        }
+
+        function heatmapStartDate() {
+          const today = new Date();
+          const start = new Date(Date.UTC(
+            today.getUTCFullYear(),
+            today.getUTCMonth(),
+            today.getUTCDate()
+          ));
+          start.setUTCDate(start.getUTCDate() - 52 * 7 - start.getUTCDay());
+          return start;
+        }
+
+        function buildHeatmapDates(start) {
+          const dates = [];
+          for (let i = 0; i < HEATMAP_WEEKS * 7; i++) {
+            const d = new Date(start);
+            d.setUTCDate(start.getUTCDate() + i);
+            dates.push(formatDateUTC(d));
+          }
+          return dates;
+        }
+
+        function renderHeatmap(heatEl, dayMap, colors, label) {
+          heatEl.innerHTML = '';
+          const dates = buildHeatmapDates(heatmapStartDate());
+
+          for (let day = 0; day < 7; day++) {
+            for (let week = 0; week < HEATMAP_WEEKS; week++) {
+              const date = dates[week * 7 + day];
+              const count = dayMap[date] || 0;
+              const cell = document.createElement('div');
+              cell.style.cssText = 'aspect-ratio:1;border-radius:1px;min-width:0;min-height:0;';
+              cell.style.background = intensityColor(count, colors);
+              cell.title = `${date}: ${count} ${label}${count === 1 ? '' : 's'}`;
+              heatEl.appendChild(cell);
+            }
+          }
+        }
+
+        function renderMonthLabels(containerId, startDate) {
+          const el = document.getElementById(containerId);
+          if (!el) return;
+          const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+          const labels = [];
+          let lastMonth = -1;
+          for (let w = 0; w < HEATMAP_WEEKS; w++) {
+            const d = new Date(startDate);
+            d.setUTCDate(startDate.getUTCDate() + w * 7);
+            const month = d.getUTCMonth();
+            if (month !== lastMonth) {
+              labels.push(months[month]);
+              lastMonth = month;
+            }
+          }
+          el.innerHTML = labels.map(m => `<span>${m}</span>`).join('');
+        }
+
+        function updateLeetCodeDonut(easy, medium, hard) {
+          const total = easy + medium + hard || 1;
+          const segments = [
+            { id: 'lc-donut-easy', value: easy, color: '#33FF57' },
+            { id: 'lc-donut-medium', value: medium, color: '#FBFF48' },
+            { id: 'lc-donut-hard', value: hard, color: '#FF2A2A' }
+          ];
+          let offset = DONUT_CIRC * 0.25;
+          segments.forEach(seg => {
+            const el = document.getElementById(seg.id);
+            if (!el) return;
+            const len = (seg.value / total) * DONUT_CIRC;
+            el.setAttribute('stroke-dasharray', `${len} ${DONUT_CIRC - len}`);
+            el.setAttribute('stroke-dashoffset', String(offset));
+            offset -= len;
+          });
+        }
+
+        function updateDifficultyBars(easy, medium, hard) {
+          const max = Math.max(easy, medium, hard, 1);
+          const setBar = (id, value) => {
+            const bar = document.getElementById(id);
+            if (bar) bar.style.width = `${(value / max) * 100}%`;
+          };
+          setBar('lc-easy-bar', easy);
+          setBar('lc-medium-bar', medium);
+          setBar('lc-hard-bar', hard);
+        }
+
         function skeleton(el) {
           el.innerHTML = '';
-          for (let i = 0; i < 53 * 7; i++) {
-            const c = document.createElement('div');
-            c.style.cssText = 'aspect-ratio:1;border-radius:1px;background:#1a1a1a;';
-            c.classList.add('skeleton-pulse');
-            el.appendChild(c);
+          for (let day = 0; day < 7; day++) {
+            for (let week = 0; week < HEATMAP_WEEKS; week++) {
+              const c = document.createElement('div');
+              c.style.cssText = 'aspect-ratio:1;border-radius:1px;background:#1a1a1a;min-width:0;min-height:0;';
+              el.appendChild(c);
+            }
           }
         }
 
@@ -805,43 +907,35 @@
 
           try {
             const res  = await fetch(`${STATS_API}/api/leetcode`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
+            if (!data.days) throw new Error('Invalid API response');
 
-            // Update stats
+            const easy = data.easy || 0;
+            const medium = data.medium || 0;
+            const hard = data.hard || 0;
+
             if (totalEl) totalEl.textContent = data.total;
-            if (easyEl)  easyEl.textContent  = data.easy;
-            if (medEl)   medEl.textContent   = data.medium;
-            if (hardEl)  hardEl.textContent  = data.hard;
-            if (rankEl)  rankEl.textContent  = `#${data.ranking.toLocaleString()}`;
+            if (easyEl)  easyEl.textContent  = easy;
+            if (medEl)   medEl.textContent   = medium;
+            if (hardEl)  hardEl.textContent  = hard;
+            if (rankEl && data.ranking) rankEl.textContent = `#${Number(data.ranking).toLocaleString()}`;
 
-            // Build heatmap — last 53 weeks
+            updateLeetCodeDonut(easy, medium, hard);
+            updateDifficultyBars(easy, medium, hard);
+
             if (!heatEl) return;
-            heatEl.innerHTML = '';
             const lcColors = ['#1a1a1a','#0a3320','#145c36','#1e8c50','#33FF57'];
-
-            // Convert days array → map for O(1) lookup
             const dayMap = {};
-            data.days.forEach(d => { dayMap[d.date] = d.count; });
+            data.days.forEach(d => { dayMap[d.date] = Number(d.count) || 0; });
 
-            // Generate last 371 days (53 weeks), Sunday first
-            const today = new Date();
-            const start = new Date(today);
-            start.setDate(today.getDate() - 52 * 7 - today.getDay());
-
-            for (let i = 0; i < 53 * 7; i++) {
-              const d    = new Date(start);
-              d.setDate(start.getDate() + i);
-              const key  = d.toISOString().split('T')[0];
-              const cell = document.createElement('div');
-              cell.style.cssText = 'aspect-ratio:1;border-radius:1px;';
-              cell.style.background = intensityColor(dayMap[key] || 0, lcColors);
-              cell.title = `${key}: ${dayMap[key] || 0} submissions`;
-              heatEl.appendChild(cell);
-            }
+            const start = heatmapStartDate();
+            renderHeatmap(heatEl, dayMap, lcColors, 'submission');
+            renderMonthLabels('lc-month-labels', start);
 
           } catch(e) {
             console.error('LeetCode API failed:', e);
-            if (heatEl) heatEl.innerHTML = '<span style="color:#444;font-size:10px;font-family:monospace;">// failed to load</span>';
+            if (heatEl) heatEl.innerHTML = '<span style="color:#444;font-size:10px;font-family:monospace;">// failed to load — check STATS_API</span>';
           }
         }
 
@@ -862,39 +956,11 @@
             if (contribEl) contribEl.textContent  = data.total_contributions;
             if (followEl)  followEl.textContent   = data.followers;
 
-            // Build heatmap
             if (!heatEl) return;
-            heatEl.innerHTML = '';
             const ghColors = ['#161b22','#0e4429','#006d32','#26a641','#39d353'];
-
             const dayMap = {};
-            data.days.forEach(d => { dayMap[d.date] = d.count; });
-
-            const today = new Date();
-            const start = new Date(today);
-            start.setDate(today.getDate() - 52 * 7 - today.getDay());
-
-            // GitHub grid: column by column (week × day)
-            // CSS grid is row-major so we fill row by row transposed
-            const grid = [];
-            for (let i = 0; i < 53 * 7; i++) {
-              const d   = new Date(start);
-              d.setDate(start.getDate() + i);
-              grid.push({ date: d.toISOString().split('T')[0], count: 0 });
-            }
-            grid.forEach(g => { g.count = dayMap[g.date] || 0; });
-
-            // Render row by row (d=0..6, w=0..52)
-            for (let d = 0; d < 7; d++) {
-              for (let w = 0; w < 53; w++) {
-                const cell = document.createElement('div');
-                cell.style.cssText = 'aspect-ratio:1;border-radius:1px;';
-                const entry = grid[w * 7 + d];
-                cell.style.background = intensityColor(entry.count, ghColors);
-                cell.title = `${entry.date}: ${entry.count} contributions`;
-                heatEl.appendChild(cell);
-              }
-            }
+            data.days.forEach(d => { dayMap[d.date] = Number(d.count) || 0; });
+            renderHeatmap(heatEl, dayMap, ghColors, 'contribution');
 
           } catch(e) {
             console.error('GitHub API failed:', e);
